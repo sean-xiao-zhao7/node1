@@ -1,6 +1,49 @@
 <%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/product.css">
     </head>
 
     <body>
         <%- include('../includes/navigation.ejs') %>
+
+        <main>
+            <h1><%= pageTitle %></h1>
+            <p>Total price: $<%= totalPrice %></p>
+            <% if (cartItems.length > 0) { %>
+                <div class="grid">
+                <% for (let cartItem of cartItems) { %>
+                    <% [...Array(cartItem.qty)].map((_, i) => { %>
+                        <article class="card product-item">
+                            <header class="card__header">
+                                <h1 class="product__title">
+                                    <%= cartItem.product.title %>
+                                </h1>
+                            </header>
+                            <div class="card__image">
+                                <img src="<%= cartItem.product.imageUrl %>" alt="<%= cartItem.product.title %>">
+                            </div>
+                            <div class="card__content">
+                                <h2 class="product__price">$
+                                    <%= cartItem.product.price %>
+                                </h2>
+                                <p class="product__description">
+                                    <%= cartItem.product.description %>
+                                </p>
+                            </div>
+                            <div class="card__actions">
+                                <a href="/products/<%= cartItem.product.id %>" class='btn'>Details</a>  
+                                <form action='/cart/remove' method='post'>
+                                    <button class='btn' type='submit'>Remove from cart</button>
+                                    <input type='hidden' value='<%= cartItem.product.id %>' name='id' />
+                                    <input type='hidden' value='<%= cartItem.product.price %>' name='price' />
+                                </form>                              
+                            </div>
+                        </article>
+                    <% }) %>
+                <% } %>
+                    </div>
+            <% }  else { %>
+                <p>No items in cart</p>    
+            <% } %>           
+        </main>
+
         <%- include('../includes/end.ejs') %>
