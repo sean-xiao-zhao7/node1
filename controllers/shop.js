@@ -2,7 +2,7 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 
 exports.getProducts = (req, res, next) => {
-    Product.findAll()
+    Product.fetchAll()
         .then((products) => {
             res.render("shop/product-list", {
                 prods: products,
@@ -15,7 +15,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
     const id = req.params.id;
-    Product.findByPk(id)
+    Product.fetchOne(id)
         .then((product) => {
             if (!product) {
                 return res.redirect("/");
@@ -30,7 +30,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-    Product.findAll()
+    Product.fetchAll()
         .then((products) => {
             res.render("shop/index", {
                 prods: products,
@@ -83,11 +83,13 @@ exports.addToCart = (req, res, next) => {
                 // product already in cart, increase quantity
                 qty = products[0].cartItem.qty + 1;
             }
-            return Product.findByPk(id).then((product) => {
-                return cart.addProduct(product, { through: { qty: qty } });
-            }).catch(err => {
-                console.log(err)
-            });
+            return Product.findByPk(id)
+                .then((product) => {
+                    return cart.addProduct(product, { through: { qty: qty } });
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
         })
         .then((products) => {
             res.redirect("/products");

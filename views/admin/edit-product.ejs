@@ -24,7 +24,7 @@
                 <label for="description">Description</label>
                 <textarea name="description" id="description" rows="5"><%= editing ? product.description : null %></textarea>
             </div>
-            <input type='hidden' name='id' value='<%= editing ? product.id : null %>' />
+            <input type='hidden' name='id' value='<%= editing ? product._id : null %>' />
             <button class="btn" type="submit"><%= editing ? "Edit Product" : "Add Product" %></button>
         </form>
     </main>
