@@ -1,9 +1,56 @@
 <%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/product.css">
     </head>
 
     <body>
         <%- include('../includes/navigation.ejs') %>
+
         <main>
-            <h1>Nothing there!</h1>
+            <h1><%= pageTitle %></h1>
+            <% orders.forEach((order, index) => { %>                                
+                <% for (const cartItem in order.cart) { 
+                    let totalPrice = 0;
+                    for (const cartItemId in order.cart) {
+                        totalPrice += +order.cart[cartItemId].product.price;
+                    }    
+                %>
+                    <h2>Order #<%= index + 1 %></h2>
+                    <p>Total price: $<%= totalPrice %></p>
+                    <form action='/finalize-orders' method='POST'>
+                        <button class='btn' type='submit'>Finalize this order</button>
+                    </form>                    
+                    <div class="grid">
+                        <% [...Array(order.cart[cartItem].quantity)].map((_, i) => { %>
+                            <article class="card product-item">
+                                <header class="card__header">
+                                    <h1 class="product__title">
+                                        <%= order.cart[cartItem].product.title %>
+                                    </h1>
+                                </header>
+                                <div class="card__image">
+                                    <img src="<%= order.cart[cartItem].product.imageUrl %>" alt="<%= order.cart[cartItem].product.title %>">
+                                </div>
+                                <div class="card__content">
+                                    <h2 class="product__price">$
+                                        <%= order.cart[cartItem].product.price %>
+                                    </h2>
+                                    <p class="product__description">
+                                        <%= order.cart[cartItem].product.description %>
+                                    </p>
+                                </div>
+                                <div class="card__actions">
+                                    <a href="/products/<%= order.cart[cartItem].product._id %>" class='btn'>Details</a>  
+                                    <form action='/cart/remove' method='post'>
+                                        <button class='btn' type='submit'>Remove from cart</button>
+                                        <input type='hidden' value='<%= order.cart[cartItem].product._id %>' name='id' />
+                                        <input type='hidden' value='<%= order.cart[cartItem].product.price %>' name='price' />
+                                    </form>                              
+                                </div>
+                            </article>
+                        <% }) %>
+                    </div>
+                <% } %>
+            <% }) %>  
         </main>
+
         <%- include('../includes/end.ejs') %>
