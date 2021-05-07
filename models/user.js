@@ -1,98 +1,64 @@
-const getDb = require("../util/database").getDb;
-const mongodb = require("mongodb");
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+const modelSchema = new Schema(
+    {
+        name: { type: String, required: true },
+        email: { type: String, required: true },
+        cart: Schema.Types.Mixed,
+    },
+    { minimize: false }
+);
+const Order = require("./order");
 
-class User {
-    constructor(name, email, id, cart) {
-        this.name = name;
-        this.email = email;
-        this._id = id ? new mongodb.ObjectID(id) : null;
-        this.cart = cart;
+modelSchema.methods.addToCart = function (product) {
+    if (this.cart[product._id]) {
+        // increase quantity
+        this.cart[product._id].quantity += 1;
+        return this.save();
     }
 
-    save() {
-        const db = getDb();
-        if (this._id) {
-            return db
-                .collection("users")
-                .updateOne({ _id: this._id }, { $set: this })
-                .then()
-                .catch((err) => {
-                    console.log(err);
-                });
-        } else {
-            return db
-                .collection("users")
-                .insertOne(this)
-                .then()
-                .catch((err) => {
-                    console.log(err);
-                });
-        }
-    }
+    // no such item yet, add it
+    this.cart[product._id] = { product: product, quantity: 1 };
+    this.markModified("cart");
+    return this.save();
+};
 
-    static findById(id) {
-        const db = getDb();
-        return db
-            .collection("users")
-            .findOne({ _id: mongodb.ObjectID(id) })
-            .then()
-            .catch((err) => {
-                console.log(err);
-            });
-    }
+modelSchema.methods.getCart = function () {
+    return this.cart;
+};
 
-    addToCart(product) {
-        if (this.cart[product._id]) {
-            // increase quantity
-            this.cart[product._id].quantity += 1;
+modelSchema.methods.deleteFromCart = function (productId) {
+    if ((this.cart[productId].quantity -= 1) == 0) {
+        delete this.cart[productId];
+    }
+    this.markModified("cart");
+    return this.save();
+};
+
+modelSchema.methods.checkout = function () {
+    const order = new Order({
+        cart: this.cart,
+        user: { name: this.name, email: this.email, id: this._id },
+    });
+    order.markModified("cart");
+    order.markModified("user");
+    return order
+        .save()
+        .then((_) => {
+            this.cart = {};
+            this.markModified("cart");
             return this.save();
-        }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
 
-        // no such item yet, add it
-        this.cart[product._id] = { product: product, quantity: 1 };
-        return this.save();
-    }
+modelSchema.methods.getOrders = function () {
+    return Order.find({ "user.id": this._id }).catch((err) => {
+        console.log(err);
+    });
+};
 
-    getCart() {
-        return this.cart;
-    }
-
-    deleteFromCart(productId) {
-        if ((this.cart[productId].quantity -= 1) == 0) {
-            delete this.cart[productId];
-        }
-        return this.save();
-    }
-
-    checkout() {
-        const db = getDb();
-        return db
-            .collection("orders")
-            .insertOne({
-                cart: this.cart,
-                user: { name: this.name, email: this.email, id: this._id },
-            })
-            .then((_) => {
-                this.cart = {};
-                return db
-                    .collection("users")
-                    .updateOne({ _id: this._id }, { $set: { cart: {} } });
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }
-
-    getOrders() {
-        const db = getDb();
-        return db
-            .collection("orders")
-            .find({ "user.id": this._id })
-            .toArray()
-            .catch((err) => {
-                console.log(err);
-            });
-    }
-}
-
-module.exports = User;
+module.exports = mongoose.model("User", modelSchema);
+module.exports.schema = modelSchema;

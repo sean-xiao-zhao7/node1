@@ -1,9 +1,9 @@
-const Product = require("../models/product");
+const Product = require("../models/product").Product;
 const Order = require("../models/order");
 const User = require("../models/user");
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll()
+    Product.find()
         .then((products) => {
             res.render("shop/product-list", {
                 prods: products,
@@ -16,7 +16,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.getProduct = (req, res, next) => {
     const id = req.params.id;
-    Product.fetchOne(id)
+    Product.findById(id)
         .then((product) => {
             if (!product) {
                 return res.redirect("/");
@@ -31,7 +31,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll()
+    Product.find()
         .then((products) => {
             res.render("shop/index", {
                 prods: products,
@@ -44,13 +44,11 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
     const cart = req.user.getCart();
-
     // calc total price
     let total = 0;
     for (const cartItemId in cart) {
         total += +cart[cartItemId].product.price;
     }
-
     res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
@@ -61,11 +59,11 @@ exports.getCart = (req, res, next) => {
 
 exports.addToCart = (req, res, next) => {
     const id = req.body.id;
-    Product.fetchOne(id)
+    Product.findById(id)
         .then((product) => {
             return req.user.addToCart(product);
         })
-        .then((_) => {
+        .then((result) => {
             res.redirect("/cart");
         })
         .catch((e) => console.log(e));
@@ -103,4 +101,3 @@ exports.getCheckout = (req, res, next) => {
         pageTitle: "Checkout",
     });
 };
-
