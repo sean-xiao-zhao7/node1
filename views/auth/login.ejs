@@ -6,7 +6,8 @@
 <body>
    <%- include('../includes/navigation.ejs') %>
 
-    <main>
+    <main>        
+        <%= errorMessage %>        
         <form class="auth-form" action="/auth/login" method="POST">
             <div class="form-control">
                 <label for="title">Username</label>
@@ -15,7 +16,8 @@
             <div class="form-control">
                 <label for="title">Password</label>
                 <input type="password" name="password" id="password">
-            </div>     
+            </div>
+            <input type='hidden' name='_csrf' value='<%= csrfToken %>' />     
             <button class="btn" type="submit">Login</button>
         </form>
     </main>

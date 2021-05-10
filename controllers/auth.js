@@ -5,6 +5,8 @@ exports.login = (req, res, next) => {
     res.render("auth/login", {
         path: "/",
         pageTitle: "Login",
+        csrfToken: req.csrfToken(),
+        errorMessage: req.flash("error"),
     });
 };
 
@@ -25,6 +27,9 @@ exports.loginPOST = (req, res, next) => {
                     .catch((e) => {
                         console.log(e);
                     });
+            } else {
+                req.flash("error", "No user found with email " + req.body.username);
+                res.redirect("/auth/login");
             }
         })
         .catch((e) => console.log(e));
