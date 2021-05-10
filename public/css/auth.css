@@ -1,0 +1,11 @@
+.auth-form {
+    width: 20rem;
+    max-width: 90%;
+    margin: auto;
+    display: block;
+}
+
+.auth__title {
+    font-size: 1.2rem;
+    text-align: center;
+}
