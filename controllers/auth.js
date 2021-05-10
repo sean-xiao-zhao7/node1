@@ -6,7 +6,7 @@ exports.login = (req, res, next) => {
         path: "/",
         pageTitle: "Login",
         csrfToken: req.csrfToken(),
-        errorMessage: req.flash("error"),
+        errorMessage: req.flash("error "),
     });
 };
 
