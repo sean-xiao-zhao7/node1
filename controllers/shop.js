@@ -1,6 +1,9 @@
 const Product = require("../models/product").Product;
 const Order = require("../models/order");
 const User = require("../models/user");
+const fs = require("fs");
+const path = require("path");
+const PDF = require("pdfkit");
 
 exports.getProducts = (req, res, next) => {
     Product.find()
@@ -100,4 +103,20 @@ exports.getCheckout = (req, res, next) => {
         path: "/checkout",
         pageTitle: "Checkout",
     });
+};
+
+exports.getOrderInvoice = (req, res, next) => {
+    const newPDF = new PDF();
+    newPDF.pipe(fs.createWriteStream(path.join("data", "invoices", "invoice.pdf")));
+    newPDF.pipe(res);
+
+    // make PDF
+    newPDF.fontSize("26").text("Invoice", {
+        underline: true,
+    });
+
+    // send PDF
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=invoice.pdf");
+    newPDF.end();
 };

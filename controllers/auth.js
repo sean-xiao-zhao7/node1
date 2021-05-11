@@ -10,17 +10,26 @@ const transporter = nodemailer.createTransport(
     })
 );
 const crypto = require("crypto");
+const { validationResult } = require("express-validator");
 
 exports.login = (req, res, next) => {
+    console.log(res.locals);
     res.render("auth/login", {
         path: "/",
         pageTitle: "Login",
-        csrfToken: req.csrfToken(),
         errorMessage: req.flash("error"),
     });
 };
 
 exports.loginPOST = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).render("auth/login", {
+            path: "/",
+            pageTitle: "Login",
+            errorMessage: errors.array()[0].msg,
+        });
+    }
     User.findOne({ email: req.body.username })
         .then((user) => {
             if (user) {
@@ -46,7 +55,8 @@ exports.loginPOST = (req, res, next) => {
 };
 
 exports.logout = (req, res, next) => {
-    req.session.destroy(() => {
+    console.log(req.session);
+    req.session.destroy((result) => {
         res.redirect("/auth/login");
     });
 };
@@ -59,6 +69,14 @@ exports.signup = (req, res, next) => {
 };
 
 exports.signupPOST = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).render("auth/signup", {
+            path: "/signup",
+            pageTitle: "Sign up",
+            errorMessage: errors.array(),
+        });
+    }
     User.findOne({ email: req.body.username })
         .then((user) => {
             if (!user) {
@@ -68,14 +86,14 @@ exports.signupPOST = (req, res, next) => {
                         password: password,
                     });
                     newUser.save().then((_) => {
-                        transporter
-                            .sendMail({
-                                to: "john316rocks@gmail.com",
-                                from: "shop@node-complete.com",
-                                subject: "Welcome to Node1",
-                                html: "<h1>Welcome to Node1</h1>",
-                            })
-                            .then((_) => {});
+                        // transporter
+                        //     .sendMail({
+                        //         to: "john316rocks@gmail.com",
+                        //         from: "shop@node-complete.com",
+                        //         subject: "Welcome to Node1",
+                        //         html: "<h1>Welcome to Node1</h1>",
+                        //     })
+                        //     .then((_) => {});
                         this.loginPOST(req, res, next);
                     });
                 });

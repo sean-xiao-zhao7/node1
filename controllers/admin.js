@@ -10,14 +10,23 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
     const title = req.body.title;
-    const imageUrl = req.body.imageUrl;
+    const imageUrl = req.file;
     const price = req.body.price;
     const description = req.body.description;
+
+    if (!imageUrl) {
+        return res.status(422).render("admin/edit-product", {
+            pageTitle: "Add Product",
+            path: "/admin/add-product",
+            editing: false,
+        });
+    }
+
     const product = new Product({
         title: title,
         price: price,
         description: description,
-        imageUrl: imageUrl,
+        imageUrl: imageUrl.path,
         userId: req.user,
     });
     product
@@ -51,12 +60,15 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.postEditProduct = (req, res, next) => {
+    const imageFile = req.file;
     Product.findById(req.body.id)
         .then((product) => {
             product.title = req.body.title;
             product.price = req.body.price;
             product.description = req.body.description;
-            product.imageUrl = req.body.imageUrl;
+            if (imageFile) {
+                product.imageUrl = imageFile.path;
+            }
             return product.save();
         })
         .then((_) => {

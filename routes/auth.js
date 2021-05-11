@@ -1,10 +1,14 @@
-const path = require("path");
 const express = require("express");
+const { body } = require("express-validator");
 const router = express.Router();
 const authController = require("../controllers/auth");
 
 router.get("/login", authController.login);
-router.post("/login", authController.loginPOST);
+router.post(
+    "/login",
+    [body("password", "Password invalid").isLength({ min: 4 }).isAlphanumeric().trim()],
+    authController.loginPOST
+);
 router.get("/logout", authController.logout);
 router.get("/signup", authController.signup);
 router.post("/signup", authController.signupPOST);

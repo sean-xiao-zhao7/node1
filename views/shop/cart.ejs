@@ -11,6 +11,7 @@
             
             <% if (totalPrice > 0) { %>
                 <form action='/checkout' method='POST'>
+                    <input type='hidden' name='_csrf' value='<%= csrfToken %>' /> 
                     <button class='btn' type='submit'>Checkout</button>
                 </form>
                 <div class="grid">
@@ -37,6 +38,7 @@
                                 <a href="/products/<%= cart[cartItem].product._id %>" class='btn'>Details</a>  
                                 <form action='/cart/remove' method='post'>
                                     <button class='btn' type='submit'>Remove from cart</button>
+                                    <input type='hidden' name='_csrf' value='<%= csrfToken %>' /> 
                                     <input type='hidden' value='<%= cart[cartItem].product._id %>' name='id' />
                                     <input type='hidden' value='<%= cart[cartItem].product.price %>' name='price' />
                                 </form>                              

@@ -19,6 +19,7 @@
                     <form action='/finalize-orders' method='POST'>
                         <button class='btn' type='submit'>Finalize this order</button>
                     </form>                    
+                    <a href='/orders/<%= order._id %>'><button class='btn'>Invoice</button></a>
                     <div class="grid">
                         <% [...Array(order.cart[cartItem].quantity)].map((_, i) => { %>
                             <article class="card product-item">
@@ -42,6 +43,7 @@
                                     <a href="/products/<%= order.cart[cartItem].product._id %>" class='btn'>Details</a>  
                                     <form action='/cart/remove' method='post'>
                                         <button class='btn' type='submit'>Remove from cart</button>
+                                        <input type='hidden' name='_csrf' value='<%= csrfToken %>' /> 
                                         <input type='hidden' value='<%= order.cart[cartItem].product._id %>' name='id' />
                                         <input type='hidden' value='<%= order.cart[cartItem].product.price %>' name='price' />
                                     </form>                              
