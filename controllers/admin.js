@@ -1,4 +1,5 @@
 const Product = require("../models/product").Product;
+const deleteFile = require("../util/file");
 
 exports.getAddProduct = (req, res, next) => {
     res.render("admin/edit-product", {
@@ -67,6 +68,7 @@ exports.postEditProduct = (req, res, next) => {
             product.price = req.body.price;
             product.description = req.body.description;
             if (imageFile) {
+                deleteFile(product.imageUrl);
                 product.imageUrl = imageFile.path;
             }
             return product.save();
@@ -88,7 +90,8 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.deleteProduct = (req, res, next) => {
-    Product.findByIdAndRemove(req.body.id).then(() => {
+    Product.findByIdAndRemove(req.body.id).then((product) => {
+        deleteFile(product.imageUrl);
         res.redirect("/admin/products");
     });
 };
