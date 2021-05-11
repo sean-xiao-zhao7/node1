@@ -6,6 +6,8 @@ const modelSchema = new Schema(
         password: { type: String, required: true },
         email: { type: String, required: true },
         cart: Schema.Types.Mixed,
+        resetToken: String,
+        resetTokenExpire: Date,
     },
     { minimize: false }
 );

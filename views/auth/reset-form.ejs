@@ -7,11 +7,7 @@
    <%- include('../includes/navigation.ejs') %>
 
     <main>
-        <form class="auth-form" action="/auth/signup" method="POST">
-            <div class="form-control">
-                <label for="title">Username</label>
-                <input type="text" name="username" id="username">
-            </div>     
+        <form class="auth-form" action="/auth/newPassword" method="POST">            
             <div class="form-control">
                 <label for="title">Password</label>
                 <input type="password" name="password" id="password">
@@ -20,8 +16,10 @@
                 <label for="title">Re-enter password</label>
                 <input type="password" name="password2" id="password2">
             </div>     
-            <input type='hidden' name='_csrf' value='<%= csrfToken %>' />     
-            <button class="btn" type="submit">Sign up</button>
+            <input type='hidden' name='_csrf' value='<%= csrfToken %>' />  
+            <input type='hidden' name='userId' value='<%= userId %>' />     
+            <input type='hidden' name='token' value='<%= token %>' />     
+            <button class="btn" type="submit">Set new password</button>
         </form>
     </main>
 <%- include('../includes/end.ejs') %>
