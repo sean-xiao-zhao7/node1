@@ -5,16 +5,34 @@ const fs = require("fs");
 const path = require("path");
 const PDF = require("pdfkit");
 
+const ITEMS_PER_PAGE = 2;
+
 exports.getProducts = (req, res, next) => {
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    let totalItems;
     Product.find()
-        .then((products) => {
-            res.render("shop/product-list", {
-                prods: products,
-                pageTitle: "All Products",
-                path: "/products",
-            });
-        })
-        .catch((err) => console.log(err));
+        .countDocuments()
+        .then((num) => {
+            totalItems = num;
+            Product.find()
+                .skip((page - 1) * ITEMS_PER_PAGE)
+                .limit(ITEMS_PER_PAGE)
+                .then((products) => {
+                    res.render("shop/product-list", {
+                        prods: products,
+                        pageTitle: "All Products",
+                        path: "/products",
+                        currentPage: page,
+                        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+                        hasPreviousPage: page > 1,
+                        nextPage: page + 1,
+                        previousPage: page - 1,
+                        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+                        url: '/products'
+                    });
+                })
+                .catch((err) => console.log(err));
+        });
 };
 
 exports.getProduct = (req, res, next) => {
@@ -34,15 +52,32 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    let totalItems;
+
     Product.find()
-        .then((products) => {
-            res.render("shop/index", {
-                prods: products,
-                pageTitle: "Shop",
-                path: "/",
-            });
-        })
-        .catch((err) => console.log(err));
+        .countDocuments()
+        .then((num) => {
+            totalItems = num;
+            Product.find()
+                .skip((page - 1) * ITEMS_PER_PAGE)
+                .limit(ITEMS_PER_PAGE)
+                .then((products) => {
+                    return res.render("shop/index", {
+                        prods: products,
+                        pageTitle: "Shop",
+                        path: "/",
+                        currentPage: page,
+                        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+                        hasPreviousPage: page > 1,
+                        nextPage: page + 1,
+                        previousPage: page - 1,
+                        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+                        url: '/'
+                    });
+                })
+                .catch((err) => console.log(err));
+        });
 };
 
 exports.getCart = (req, res, next) => {

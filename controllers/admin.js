@@ -95,3 +95,12 @@ exports.deleteProduct = (req, res, next) => {
         res.redirect("/admin/products");
     });
 };
+
+exports.deleteProductJSON = (req, res, next) => {
+    Product.findByIdAndRemove(req.params.id).then((product) => {
+        deleteFile(product.imageUrl);
+        res.status(200).json({
+            message: "Success",
+        });
+    });
+};
