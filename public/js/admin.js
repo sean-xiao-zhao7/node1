@@ -1,5 +1,5 @@
 const deleteProduct = (button) => {
-    const prodId = button.parentNode.querySelector("[name=productId]").value;
+    const prodId = button.parentNode.querySelector("[name=id]").value;
     const csrf = button.parentNode.querySelector("[name=_csrf]").value;
     fetch("/admin/delete-product-json/" + prodId, {
         method: "DELETE",

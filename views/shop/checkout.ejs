@@ -1,0 +1,24 @@
+<%- include('../includes/head.ejs') %>
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+
+        <main>
+            <h1>Checkout</h1>
+            <div>
+                <button id='order-btn' class='btn'>Finalize payment</button>
+                <script src="https://js.stripe.com/v3/"></script>
+                <script>
+                    var stripe = Stripe('---')
+                    var orderBtn = document.getElementById('order-btn');
+                    orderBtn.addEventListener('click', function() {
+                        stripe.redirectToCheckout({
+                            sessionId: '<%= sessionId %>'
+                        })
+                    })
+                </script>
+            </div>
+        </main>
+
+        <%- include('../includes/end.ejs') %>

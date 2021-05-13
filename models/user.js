@@ -17,6 +17,7 @@ modelSchema.methods.addToCart = function (product) {
     if (this.cart[product._id]) {
         // increase quantity
         this.cart[product._id].quantity += 1;
+        this.markModified("cart");
         return this.save();
     }
 

@@ -4,6 +4,7 @@ const User = require("../models/user");
 const fs = require("fs");
 const path = require("path");
 const PDF = require("pdfkit");
+const stripe = require("stripe")("sk_test_e0ZOwmIiZzNMMeUI2tkUpcy0");
 
 const ITEMS_PER_PAGE = 2;
 
@@ -28,7 +29,7 @@ exports.getProducts = (req, res, next) => {
                         nextPage: page + 1,
                         previousPage: page - 1,
                         lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
-                        url: '/products'
+                        url: "/products",
                     });
                 })
                 .catch((err) => console.log(err));
@@ -73,7 +74,7 @@ exports.getIndex = (req, res, next) => {
                         nextPage: page + 1,
                         previousPage: page - 1,
                         lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
-                        url: '/'
+                        url: "/",
                     });
                 })
                 .catch((err) => console.log(err));
@@ -134,10 +135,33 @@ exports.doCheckout = (req, res, next) => {
 };
 
 exports.getCheckout = (req, res, next) => {
-    res.render("shop/checkout", {
-        path: "/checkout",
-        pageTitle: "Checkout",
-    });
+    Order.findById(req.params.orderId)
+        .then((order) => {
+            stripe.checkout.sessions
+                .create({
+                    payment_method_types: ["card"],
+                    line_items: Object.keys(order.cart).map((productId) => {
+                        return {
+                            name: order.cart[productId].product.title,
+                            description: order.cart[productId].product.description,
+                            amount: order.cart[productId].product.price,
+                            currency: "usd",
+                            quantity: order.cart[productId].quantity,
+                        };
+                    }),
+                    success_url: req.protocol + "://" + req.get("host") + "/checkout/success",
+                    cancel_url: req.protocol + "://" + req.get("host") + "/checkout/cancel",
+                })
+                .then((session) => {
+                    res.render("shop/checkout", {
+                        path: "/checkout",
+                        pageTitle: "Checkout",
+                        cart: order.cart,
+                        sessionId: session.id,
+                    });
+                });
+        })
+        .catch((e) => console.log(e));
 };
 
 exports.getOrderInvoice = (req, res, next) => {
